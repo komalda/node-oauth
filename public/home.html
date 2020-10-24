@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<meta http-equiv='cache-control' content='no-cache'>
+<meta http-equiv='expires' content='0'>
+<meta http-equiv='pragma' content='no-cache'>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title>
+</head>
+
+<body>
+<H1>Welcome : <span id="name"></span></H1>
+<H2>Repos:</H2>
+<P id="repos">
+
+</P>
+
+<p style="align:right;">
+<a href="#" onclick="logout()" >Logout</a>
+</p> 
+</body>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    function logout (){
+		fetch('/lgout',{
+			//right now to do server session clearence
+		}).then(res => {
+			//let stateObj = { home: "end" }
+			//window.history.pushState(stateObj,"end", "/end.html");
+			location.replace("/end.html")
+		}).catch(error =>{
+			alert("error ....");
+			alert(error);
+		});
+	}
+	function fetchRepos(reposUrl){
+		//alert(reposUrl);
+		fetch(reposUrl,{
+         "headers":{
+			"Content-type":"application/json",
+			"Authorization": "token "+token
+		 }
+		}).then(res => res.json())
+		 .then(res => {
+			console.log(res);
+			var reposHtmlli="<ol>";
+			res.forEach(element => {
+				reposHtmlli = reposHtmlli+"<li>"+element.name+"</li>";
+			});
+			reposHtmlli = reposHtmlli+"</ol>";
+			$("#repos").html(reposHtmlli);
+		}).catch(error =>{
+			alert("error ....in geting repose");
+			alert(error);
+		});
+
+	};
+
+	const query = window.location.search.substring(1)
+	let stateObj = { home: "home" }
+	window.history.pushState(stateObj,"end", "/home.html");
+    const token = query.split('token=')[1]
+	//alert(token);
+	var userDetails;
+    fetch('https://api.github.com/user',{
+         "headers":{
+			"Content-type":"application/json",
+			"Authorization": "token "+token
+		 }
+		}).then(res => res.json())
+		 .then(res => {
+			userDetails = res;
+			var name = res.name;
+			var id = res.login;
+			if(name)$("#name").text(name);
+			else $("#name").text(id);
+			fetchRepos(res.repos_url);
+		}).catch(error =>{
+			alert("error ....");
+			alert(error);
+	});
+	
+
+
+	
+</script>
+
+</html>
